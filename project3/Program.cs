@@ -47,9 +47,9 @@ namespace UnoGame
             return Color == topCard.Color || Value == topCard.Value;
         }
 
-        public void Display()
+        private ConsoleColor GetConsoleColor()
         {
-            ConsoleColor consoleColor = Color switch
+            return Color switch
             {
                 CardColor.Red => ConsoleColor.Red,
                 CardColor.Yellow => ConsoleColor.Yellow,
@@ -58,10 +58,169 @@ namespace UnoGame
                 CardColor.Wild => ConsoleColor.Magenta,
                 _ => ConsoleColor.White
             };
+        }
 
-            Console.ForegroundColor = consoleColor;
-            Console.Write($"[{Color} {Value}]");
+        private string GetValueSymbol()
+        {
+            return Value switch
+            {
+                CardValue.Zero => "0",
+                CardValue.One => "1",
+                CardValue.Two => "2",
+                CardValue.Three => "3",
+                CardValue.Four => "4",
+                CardValue.Five => "5",
+                CardValue.Six => "6",
+                CardValue.Seven => "7",
+                CardValue.Eight => "8",
+                CardValue.Nine => "9",
+                CardValue.Skip => "⊘",
+                CardValue.Reverse => "⇄",
+                CardValue.DrawTwo => "+2",
+                CardValue.Wild => "W",
+                CardValue.WildDrawFour => "+4",
+                _ => "?"
+            };
+        }
+
+        public void DisplayCard(bool showNumber = false, int number = 0, bool highlight = false)
+        {
+            ConsoleColor bgColor = GetConsoleColor();
+            ConsoleColor fgColor = ConsoleColor.White;
+            
+            if (Color == CardColor.Yellow)
+                fgColor = ConsoleColor.Black;
+
+            string symbol = GetValueSymbol();
+            string numStr = showNumber ? $"{number}" : " ";
+
+            // Card design using box drawing characters
+            Console.ForegroundColor = bgColor;
+            Console.Write("╔═════╗");
             Console.ResetColor();
+            
+            if (highlight)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Write(" ✓");
+                Console.ResetColor();
+            }
+            
+            if (showNumber)
+            {
+                Console.ForegroundColor = ConsoleColor.Gray;
+                Console.Write($" [{numStr}]");
+                Console.ResetColor();
+            }
+            
+            Console.WriteLine();
+
+            // Top section
+            Console.ForegroundColor = bgColor;
+            Console.Write("║");
+            Console.BackgroundColor = bgColor;
+            Console.ForegroundColor = ConsoleColor.Black;
+            Console.Write($" {symbol,-3} ");
+            Console.ResetColor();
+            Console.ForegroundColor = bgColor;
+            Console.WriteLine("║");
+
+            // Middle section
+            Console.Write("║");
+            Console.BackgroundColor = bgColor;
+            Console.ForegroundColor = ConsoleColor.Black;
+            Console.Write("     ");
+            Console.ResetColor();
+            Console.ForegroundColor = bgColor;
+            Console.WriteLine("║");
+
+            // Bottom section
+            Console.Write("║");
+            Console.BackgroundColor = bgColor;
+            Console.ForegroundColor = ConsoleColor.Black;
+            Console.Write($" {symbol,3} ");
+            Console.ResetColor();
+            Console.ForegroundColor = bgColor;
+            Console.WriteLine("║");
+
+            Console.Write("╚═════╝");
+            Console.ResetColor();
+            Console.WriteLine();
+        }
+
+        public void DisplayInline()
+        {
+            ConsoleColor bgColor = GetConsoleColor();
+            ConsoleColor fgColor = ConsoleColor.White;
+            
+            if (Color == CardColor.Yellow)
+                fgColor = ConsoleColor.Black;
+
+            string symbol = GetValueSymbol();
+
+            Console.ForegroundColor = bgColor;
+            Console.Write("╔═════╗ ");
+            Console.ResetColor();
+        }
+
+        public void DisplayInlineLine(int lineNum)
+        {
+            ConsoleColor bgColor = GetConsoleColor();
+            ConsoleColor fgColor = ConsoleColor.White;
+            
+            if (Color == CardColor.Yellow)
+                fgColor = ConsoleColor.Black;
+
+            string symbol = GetValueSymbol();
+
+            if (lineNum == 0)
+            {
+                Console.ForegroundColor = bgColor;
+                Console.Write("╔═════╗ ");
+                Console.ResetColor();
+            }
+            else if (lineNum == 1)
+            {
+                Console.ForegroundColor = bgColor;
+                Console.Write("║");
+                Console.BackgroundColor = bgColor;
+                Console.ForegroundColor = ConsoleColor.Black;
+                Console.Write($" {symbol,-3} ");
+                Console.ResetColor();
+                Console.ForegroundColor = bgColor;
+                Console.Write("║ ");
+                Console.ResetColor();
+            }
+            else if (lineNum == 2)
+            {
+                Console.ForegroundColor = bgColor;
+                Console.Write("║");
+                Console.BackgroundColor = bgColor;
+                Console.ForegroundColor = ConsoleColor.Black;
+                Console.Write("     ");
+                Console.ResetColor();
+                Console.ForegroundColor = bgColor;
+                Console.Write("║ ");
+                Console.ResetColor();
+            }
+            else if (lineNum == 3)
+            {
+                Console.ForegroundColor = bgColor;
+                Console.Write("║");
+                Console.BackgroundColor = bgColor;
+                Console.ForegroundColor = ConsoleColor.Black;
+                Console.Write($" {symbol,3} ");
+                Console.ResetColor();
+                Console.ForegroundColor = bgColor;
+                Console.Write("║ ");
+                Console.ResetColor();
+            }
+            else if (lineNum == 4)
+            {
+                Console.ForegroundColor = bgColor;
+                Console.Write("╚═════╝ ");
+                Console.ResetColor();
+            }
         }
 
         public override string ToString()
@@ -89,15 +248,44 @@ namespace UnoGame
             Hand.Add(card);
         }
 
-        public void DisplayHand()
+        public void DisplayHand(List<int>? playableIndices = null)
         {
-            Console.Write($"{Name}'s hand ({Hand.Count} cards): ");
+            if (Hand.Count == 0)
+            {
+                Console.WriteLine("No cards in hand.");
+                return;
+            }
+
+            // Display all cards in a single horizontal line
+            // Draw 5 lines for all cards
+            for (int line = 0; line < 5; line++)
+            {
+                for (int i = 0; i < Hand.Count; i++)
+                {
+                    Hand[i].DisplayInlineLine(line);
+                }
+                Console.WriteLine();
+            }
+
+            // Display card numbers and playability
             for (int i = 0; i < Hand.Count; i++)
             {
-                Console.Write($"{i + 1}. ");
-                Hand[i].Display();
-                Console.Write(" ");
+                bool isPlayable = playableIndices?.Contains(i) ?? false;
+                
+                if (isPlayable)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.Write($"  [{i + 1}]✓  ");
+                    Console.ResetColor();
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Black;
+                    Console.Write($"  [{i + 1}]   ");
+                    Console.ResetColor();
+                }
             }
+            Console.WriteLine();
             Console.WriteLine();
         }
 
@@ -122,6 +310,7 @@ namespace UnoGame
         private bool isClockwise;
         private CardColor? currentWildColor;
         private Random random;
+        private int numberOfPlayers;
 
         public UnoGame()
         {
@@ -132,6 +321,7 @@ namespace UnoGame
             isClockwise = true;
             currentWildColor = null;
             random = new Random();
+            numberOfPlayers = 4; // Default
         }
 
         private void InitializeDeck()
@@ -192,7 +382,7 @@ namespace UnoGame
                     discardPile.Clear();
                     discardPile.Add(topCard);
                     ShuffleDeck();
-                    Console.WriteLine("Reshuffling discard pile into deck...");
+                    Console.WriteLine("\n♻ Reshuffling discard pile into deck...\n");
                 }
             }
 
@@ -209,10 +399,13 @@ namespace UnoGame
 
         private void InitializePlayers()
         {
+            players.Clear();
             players.Add(new Player("You", false));
-            players.Add(new Player("Computer 1", true));
-            players.Add(new Player("Computer 2", true));
-            players.Add(new Player("Computer 3", true));
+            
+            for (int i = 1; i < numberOfPlayers; i++)
+            {
+                players.Add(new Player($"Computer {i}", true));
+            }
 
             // Deal 8 cards to each player
             foreach (var player in players)
@@ -231,12 +424,42 @@ namespace UnoGame
 
         private void DisplayGameState()
         {
-            Console.WriteLine("\n" + new string('=', 60));
-            Console.Write("Top card: ");
-            GetTopCard().Display();
+            Console.Clear();
+            Console.WriteLine("╔════════════════════════════════════════════════════════════════════════╗");
+            Console.WriteLine("║                            UNO GAME                                    ║");
+            Console.WriteLine("╚════════════════════════════════════════════════════════════════════════╝");
+            Console.WriteLine();
+
+            // Show direction indicator
+            string direction = isClockwise ? "→" : "←";
+            Console.WriteLine($"Direction: {direction}");
+            Console.WriteLine();
+
+            // Show all players' card counts in a box
+            Console.WriteLine("┌─────────────────────────────────────────────────────────────────────┐");
+            foreach (var player in players)
+            {
+                string indicator = player == players[currentPlayerIndex] ? "►" : " ";
+                string nameDisplay = player.Name.PadRight(15);
+                string cardCount = $"{player.Hand.Count} cards".PadLeft(10);
+                
+                if (player == players[currentPlayerIndex])
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                }
+                Console.WriteLine($"│ {indicator} {nameDisplay} {cardCount}                                   │");
+                Console.ResetColor();
+            }
+            Console.WriteLine("└─────────────────────────────────────────────────────────────────────┘");
+            Console.WriteLine();
+
+            // Display top card
+            Console.WriteLine("Current Card on Table:");
+            GetTopCard().DisplayCard();
+            
             if (currentWildColor.HasValue)
             {
-                Console.Write(" (Current color: ");
+                Console.Write("Active Color: ");
                 Console.ForegroundColor = currentWildColor.Value switch
                 {
                     CardColor.Red => ConsoleColor.Red,
@@ -245,16 +468,8 @@ namespace UnoGame
                     CardColor.Blue => ConsoleColor.Cyan,
                     _ => ConsoleColor.White
                 };
-                Console.Write(currentWildColor.Value);
+                Console.WriteLine($"█ {currentWildColor.Value} █");
                 Console.ResetColor();
-                Console.Write(")");
-            }
-            Console.WriteLine("\n");
-
-            // Show all players' card counts
-            foreach (var player in players)
-            {
-                Console.WriteLine($"{player.Name}: {player.Hand.Count} cards");
             }
             Console.WriteLine();
         }
@@ -273,15 +488,26 @@ namespace UnoGame
             }
             else
             {
-                Console.WriteLine("Choose a color:");
-                Console.WriteLine("1. Red");
-                Console.WriteLine("2. Yellow");
-                Console.WriteLine("3. Green");
-                Console.WriteLine("4. Blue");
+                Console.WriteLine("\n┌─────────────────────────────┐");
+                Console.WriteLine("│   Choose a Wild Color:      │");
+                Console.WriteLine("├─────────────────────────────┤");
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("│ 1. ██ Red                   │");
+                Console.ResetColor();
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("│ 2. ██ Yellow                │");
+                Console.ResetColor();
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("│ 3. ██ Green                 │");
+                Console.ResetColor();
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine("│ 4. ██ Blue                  │");
+                Console.ResetColor();
+                Console.WriteLine("└─────────────────────────────┘");
                 
                 while (true)
                 {
-                    Console.Write("Enter choice (1-4): ");
+                    Console.Write("\nEnter choice (1-4): ");
                     string? input = Console.ReadLine();
                     if (int.TryParse(input, out int choice) && choice >= 1 && choice <= 4)
                     {
@@ -306,13 +532,13 @@ namespace UnoGame
             switch (card.Value)
             {
                 case CardValue.Skip:
-                    Console.WriteLine($"Skip! Next player loses their turn.");
+                    Console.WriteLine($"\n⊘ SKIP! Next player loses their turn.");
                     MoveToNextPlayer();
                     break;
 
                 case CardValue.Reverse:
                     isClockwise = !isClockwise;
-                    Console.WriteLine($"Reverse! Direction changed.");
+                    Console.WriteLine($"\n⇄ REVERSE! Direction changed.");
                     if (players.Count == 2)
                         MoveToNextPlayer(); // In 2-player, reverse acts like skip
                     break;
@@ -320,7 +546,7 @@ namespace UnoGame
                 case CardValue.DrawTwo:
                     MoveToNextPlayer();
                     Player nextPlayer = players[currentPlayerIndex];
-                    Console.WriteLine($"{nextPlayer.Name} draws 2 cards!");
+                    Console.WriteLine($"\n+2 {nextPlayer.Name} draws 2 cards and loses their turn!");
                     nextPlayer.DrawCard(DrawFromDeck());
                     nextPlayer.DrawCard(DrawFromDeck());
                     MoveToNextPlayer();
@@ -328,15 +554,15 @@ namespace UnoGame
 
                 case CardValue.Wild:
                     currentWildColor = ChooseWildColor(player);
-                    Console.WriteLine($"{player.Name} chose {currentWildColor}");
+                    Console.WriteLine($"\n🎨 {player.Name} chose {currentWildColor}");
                     break;
 
                 case CardValue.WildDrawFour:
                     currentWildColor = ChooseWildColor(player);
-                    Console.WriteLine($"{player.Name} chose {currentWildColor}");
+                    Console.WriteLine($"\n🎨 {player.Name} chose {currentWildColor}");
                     MoveToNextPlayer();
                     Player drawFourPlayer = players[currentPlayerIndex];
-                    Console.WriteLine($"{drawFourPlayer.Name} draws 4 cards!");
+                    Console.WriteLine($"+4 {drawFourPlayer.Name} draws 4 cards and loses their turn!");
                     for (int i = 0; i < 4; i++)
                     {
                         drawFourPlayer.DrawCard(DrawFromDeck());
@@ -360,15 +586,14 @@ namespace UnoGame
 
         private bool PlayerTurn(Player player)
         {
-            Console.WriteLine($"\n>>> {player.Name}'s turn <<<");
+            Console.WriteLine($"\n╔═══════════════════════════════════════════════════════════════════════╗");
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine($"║              {player.Name}'s TURN                                          ║");
+            Console.ResetColor();
+            Console.WriteLine($"╚═══════════════════════════════════════════════════════════════════════╝\n");
             
             if (!player.IsComputer)
             {
-                player.DisplayHand();
-                Console.Write("Top card: ");
-                GetTopCard().Display();
-                Console.WriteLine();
-
                 // Find playable cards
                 List<int> playableIndices = new List<int>();
                 for (int i = 0; i < player.Hand.Count; i++)
@@ -379,30 +604,43 @@ namespace UnoGame
                     }
                 }
 
+                Console.WriteLine("Your Hand:");
+                Console.WriteLine("─────────────────────────────────────────────────────────────────────────");
+                player.DisplayHand(playableIndices);
+
                 if (playableIndices.Count == 0)
                 {
-                    Console.WriteLine("You have no playable cards. Drawing 2 cards and skipping turn...");
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("✗ No playable cards! Drawing 2 cards and skipping turn...");
+                    Console.ResetColor();
                     player.DrawCard(DrawFromDeck());
                     player.DrawCard(DrawFromDeck());
-                    Console.WriteLine($"You drew 2 cards. You now have {player.Hand.Count} cards.");
+                    Console.WriteLine($"You now have {player.Hand.Count} cards.");
+                    System.Threading.Thread.Sleep(1500);
                 }
                 else
                 {
-                    Console.WriteLine($"Playable cards: {string.Join(", ", playableIndices.Select(i => i + 1))}");
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine($"✓ Playable cards marked with ✓");
+                    Console.ResetColor();
                     
                     while (true)
                     {
-                        Console.Write("Enter card number to play (or 0 to draw 2 and skip): ");
+                        Console.WriteLine("\n┌─────────────────────────────────────┐");
+                        Console.WriteLine("│ Enter card # to play, or 0 to draw │");
+                        Console.WriteLine("└─────────────────────────────────────┘");
+                        Console.Write("Your choice: ");
                         string? input = Console.ReadLine();
                         
                         if (int.TryParse(input, out int choice))
                         {
                             if (choice == 0)
                             {
-                                Console.WriteLine("Drawing 2 cards and skipping turn...");
+                                Console.WriteLine("\nDrawing 2 cards and skipping turn...");
                                 player.DrawCard(DrawFromDeck());
                                 player.DrawCard(DrawFromDeck());
-                                Console.WriteLine($"You drew 2 cards. You now have {player.Hand.Count} cards.");
+                                Console.WriteLine($"You now have {player.Hand.Count} cards.");
+                                System.Threading.Thread.Sleep(1500);
                                 break;
                             }
                             else if (choice >= 1 && choice <= player.Hand.Count)
@@ -413,22 +651,25 @@ namespace UnoGame
                                     Card? playedCard = player.PlayCard(index);
                                     if (playedCard != null)
                                     {
+                                        Console.WriteLine($"\n✓ Playing card:");
+                                        playedCard.DisplayCard();
                                         discardPile.Add(playedCard);
-                                        Console.Write($"{player.Name} plays: ");
-                                        playedCard.Display();
-                                        Console.WriteLine();
                                         ExecuteCardEffect(playedCard, player);
                                     }
                                     break;
                                 }
                                 else
                                 {
-                                    Console.WriteLine("That card cannot be played!");
+                                    Console.ForegroundColor = ConsoleColor.Red;
+                                    Console.WriteLine("✗ That card cannot be played!");
+                                    Console.ResetColor();
                                 }
                             }
                             else
                             {
-                                Console.WriteLine("Invalid card number!");
+                                Console.ForegroundColor = ConsoleColor.Red;
+                                Console.WriteLine("✗ Invalid card number!");
+                                Console.ResetColor();
                             }
                         }
                     }
@@ -437,7 +678,8 @@ namespace UnoGame
             else
             {
                 // Computer player logic
-                System.Threading.Thread.Sleep(800); // Pause for effect
+                Console.WriteLine($"{player.Name} is thinking...");
+                System.Threading.Thread.Sleep(2000); // Thinking time
                 
                 // Find playable cards
                 List<int> playableIndices = new List<int>();
@@ -451,9 +693,12 @@ namespace UnoGame
 
                 if (playableIndices.Count == 0)
                 {
-                    Console.WriteLine($"{player.Name} has no playable cards. Drawing 2 cards and skipping turn...");
+                    Console.WriteLine($"{player.Name} has no playable cards.");
+                    System.Threading.Thread.Sleep(1000);
+                    Console.WriteLine($"Drawing 2 cards and skipping turn...");
                     player.DrawCard(DrawFromDeck());
                     player.DrawCard(DrawFromDeck());
+                    System.Threading.Thread.Sleep(2500);
                 }
                 else
                 {
@@ -462,11 +707,13 @@ namespace UnoGame
                     Card? playedCard = player.PlayCard(randomIndex);
                     if (playedCard != null)
                     {
+                        Console.WriteLine($"{player.Name} plays:");
+                        System.Threading.Thread.Sleep(800);
+                        playedCard.DisplayCard();
                         discardPile.Add(playedCard);
-                        Console.Write($"{player.Name} plays: ");
-                        playedCard.Display();
-                        Console.WriteLine();
+                        System.Threading.Thread.Sleep(1500);
                         ExecuteCardEffect(playedCard, player);
+                        System.Threading.Thread.Sleep(2000);
                     }
                 }
             }
@@ -475,10 +722,146 @@ namespace UnoGame
             return player.Hand.Count == 0;
         }
 
+        private void ShowRules()
+        {
+            Console.Clear();
+            Console.WriteLine("╔════════════════════════════════════════════════════════════════════════╗");
+            Console.WriteLine("║                            UNO RULES                                   ║");
+            Console.WriteLine("╚════════════════════════════════════════════════════════════════════════╝");
+            Console.WriteLine();
+            Console.WriteLine("OBJECTIVE:");
+            Console.WriteLine("  Be the first player to get rid of all your cards!");
+            Console.WriteLine();
+            Console.WriteLine("HOW TO PLAY:");
+            Console.WriteLine("  • Match the top card by COLOR or NUMBER");
+            Console.WriteLine("  • If you can't play, you must draw 2 cards and skip your turn");
+            Console.WriteLine("  • You can choose to draw 2 cards even if you have playable cards");
+            Console.WriteLine();
+            Console.WriteLine("SPECIAL CARDS:");
+            Console.WriteLine("  ⊘  SKIP      - Next player loses their turn");
+            Console.WriteLine("  ⇄  REVERSE   - Reverses the direction of play");
+            Console.WriteLine("  +2 DRAW TWO  - Next player draws 2 cards and loses their turn");
+            Console.WriteLine("  W  WILD      - Play on any card, choose the next color");
+            Console.WriteLine("  +4 WILD +4   - Choose color, next player draws 4 and loses turn");
+            Console.WriteLine();
+            Console.WriteLine("CARD COLORS:");
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.Write("  ██ RED   ");
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.Write("██ YELLOW   ");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write("██ GREEN   ");
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("██ BLUE");
+            Console.ResetColor();
+            Console.WriteLine();
+            Console.WriteLine("═══════════════════════════════════════════════════════════════════════════");
+            Console.Write("Press Enter to return to menu...");
+            Console.ReadLine();
+        }
+
+        private void SetNumberOfPlayers()
+        {
+            Console.Clear();
+            Console.WriteLine("╔════════════════════════════════════════════════════════════════════════╗");
+            Console.WriteLine("║                       SELECT NUMBER OF PLAYERS                         ║");
+            Console.WriteLine("╚════════════════════════════════════════════════════════════════════════╝");
+            Console.WriteLine();
+            Console.WriteLine("                           ┌──────────────────┐");
+            Console.WriteLine("                           │  2 Players       │");
+            Console.WriteLine("                           │  3 Players       │");
+            Console.WriteLine("                           │  4 Players       │");
+            Console.WriteLine("                           │  5 Players       │");
+            Console.WriteLine("                           │  6 Players       │");
+            Console.WriteLine("                           └──────────────────┘");
+            Console.WriteLine();
+            Console.Write($"                   Current: {numberOfPlayers} players. Enter choice (2-6): ");
+            
+            string? input = Console.ReadLine();
+            
+            if (int.TryParse(input, out int choice) && choice >= 2 && choice <= 6)
+            {
+                numberOfPlayers = choice;
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine($"\n                   ✓ Number of players set to {numberOfPlayers}!");
+                Console.ResetColor();
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("\n                   ✗ Invalid choice! Keeping current setting.");
+                Console.ResetColor();
+            }
+            
+            System.Threading.Thread.Sleep(1000);
+        }
+
+        private bool ShowMainMenu()
+        {
+            while (true)
+            {
+                Console.Clear();
+                Console.WriteLine("╔════════════════════════════════════════════════════════════════════════╗");
+                Console.WriteLine("║                                                                        ║");
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("║                          WELCOME TO UNO!                               ║");
+                Console.ResetColor();
+                Console.WriteLine("║                                                                        ║");
+                Console.WriteLine("╚════════════════════════════════════════════════════════════════════════╝");
+                Console.WriteLine();
+                Console.WriteLine("                           ┌──────────────────────────┐");
+                Console.WriteLine("                           │      MAIN MENU           │");
+                Console.WriteLine("                           ├──────────────────────────┤");
+                Console.WriteLine("                           │ 1. Start Game            │");
+                Console.WriteLine("                           │ 2. Rules                 │");
+                Console.WriteLine($"                           │ 3. Players ({numberOfPlayers})           │");
+                Console.WriteLine("                           │ 4. Quit                  │");
+                Console.WriteLine("                           └──────────────────────────┘");
+                Console.WriteLine();
+                Console.Write("                           Enter choice (1-4): ");
+                
+                string? input = Console.ReadLine();
+                
+                if (int.TryParse(input, out int choice))
+                {
+                    switch (choice)
+                    {
+                        case 1:
+                            return true; // Start game
+                        case 2:
+                            ShowRules();
+                            break;
+                        case 3:
+                            SetNumberOfPlayers();
+                            break;
+                        case 4:
+                            Console.Clear();
+                            Console.WriteLine("\n                    Thanks for playing UNO! Goodbye!\n");
+                            return false; // Quit
+                        default:
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine("\n                    Invalid choice! Press Enter to try again...");
+                            Console.ResetColor();
+                            Console.ReadLine();
+                            break;
+                    }
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("\n                    Invalid input! Press Enter to try again...");
+                    Console.ResetColor();
+                    Console.ReadLine();
+                }
+            }
+        }
+
         public void Play()
         {
-            Console.WriteLine("Welcome to UNO!");
-            Console.WriteLine("================");
+            if (!ShowMainMenu())
+            {
+                return; // User chose to quit
+            }
             
             InitializeDeck();
             InitializePlayers();
@@ -494,10 +877,10 @@ namespace UnoGame
             }
             discardPile.Add(firstCard);
 
-            Console.WriteLine("\nStarting game...");
-            Console.Write("First card: ");
-            firstCard.Display();
-            Console.WriteLine("\n");
+            Console.Clear();
+            Console.WriteLine("Starting card:");
+            firstCard.DisplayCard();
+            System.Threading.Thread.Sleep(1500);
 
             // Handle first card effects
             if (firstCard.Value == CardValue.Skip || 
@@ -518,13 +901,21 @@ namespace UnoGame
                 
                 if (gameWon)
                 {
-                    Console.WriteLine($"\n🎉 {currentPlayer.Name} wins! 🎉");
+                    Console.Clear();
+                    Console.WriteLine("╔════════════════════════════════════════════════════════════════════════╗");
+                    Console.WriteLine("║                                                                        ║");
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine($"║                    🎉 {currentPlayer.Name} WINS! 🎉                        ║");
+                    Console.ResetColor();
+                    Console.WriteLine("║                                                                        ║");
+                    Console.WriteLine("╚════════════════════════════════════════════════════════════════════════╝");
                     break;
                 }
 
                 if (!currentPlayer.IsComputer)
                 {
-                    Console.Write("\nPress Enter to continue...");
+                    Console.WriteLine("\n─────────────────────────────────────────────────────────────────────────");
+                    Console.Write("Press Enter to continue...");
                     Console.ReadLine();
                 }
 
@@ -537,11 +928,16 @@ namespace UnoGame
                 }
             }
 
-            Console.WriteLine("\nFinal standings:");
+            Console.WriteLine("\n╔════════════════════════════════════════════════════════════════════════╗");
+            Console.WriteLine("║                          FINAL STANDINGS                               ║");
+            Console.WriteLine("╠════════════════════════════════════════════════════════════════════════╣");
             foreach (var player in players.OrderBy(p => p.Hand.Count))
             {
-                Console.WriteLine($"{player.Name}: {player.Hand.Count} cards");
+                string nameDisplay = player.Name.PadRight(20);
+                string cardDisplay = $"{player.Hand.Count} cards".PadLeft(10);
+                Console.WriteLine($"║  {nameDisplay}  {cardDisplay}                                 ║");
             }
+            Console.WriteLine("╚════════════════════════════════════════════════════════════════════════╝");
         }
     }
 
