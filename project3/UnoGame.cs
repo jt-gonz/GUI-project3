@@ -399,16 +399,32 @@ namespace UnoGame
                                 int index = choice - 1;
                                 if (player.Hand[index].CanPlayOn(GetTopCard(), currentWildColor))
                                 {
-                                    Card? playedCard = player.PlayCard(index);
-                                    if (playedCard != null)
-                                    {
-                                        Console.WriteLine($"\n✓ Playing card:");
-                                        playedCard.DisplayCard();
-                                        discardPile.Add(playedCard);
-                                        ExecuteCardEffect(playedCard, player);
-                                    }
-                                    break;
-                                }
+                                     Card? playedCard = player.PlayCard(index);
+                                     if (playedCard != null)
+                                     {
+                                         Console.WriteLine($"\n✓ Playing card:");
+                                         playedCard.DisplayCard();
+                                         discardPile.Add(playedCard);
+ 
+                                         if (player.Hand.Count == 1)
+                                         {
+                                             Console.WriteLine("\nType 'uno' to declare you have one card left!");
+                                             string? unoInput = Console.ReadLine();
+                                             if (unoInput?.ToLower() == "uno")
+                                             {
+                                                 player.SaidUno = true;
+                                                 Console.WriteLine("You declared UNO!");
+                                             }
+                                             else
+                                             {
+                                                 Console.WriteLine("You didn't say UNO! You might be penalized...");
+                                             }
+                                         }
+ 
+                                         ExecuteCardEffect(playedCard, player);
+                                     }
+                                     break;
+                                 }
                                 else
                                 {
                                     Console.ForegroundColor = ConsoleColor.Red;
@@ -463,6 +479,14 @@ namespace UnoGame
                         playedCard.DisplayCard();
                         discardPile.Add(playedCard);
                         Thread.Sleep(1500);
+
+                        if (player.Hand.Count == 1)
+                        {
+                            player.SaidUno = true;
+                            Console.WriteLine($"\n{player.Name} has declared UNO!");
+                            Thread.Sleep(1500);
+                        }
+
                         ExecuteCardEffect(playedCard, player);
                         Thread.Sleep(2000);
                     }
@@ -645,6 +669,27 @@ namespace UnoGame
             bool gameWon = false;
             while (!gameWon)
             {
+                // Before each turn, check if any player forgot to say UNO
+                foreach (var p in players)
+                {
+                    if (p.Hand.Count == 1 && !p.SaidUno)
+                    {
+                        // Check if it's not the current player's turn to be penalized immediately
+                        if (p != players[currentPlayerIndex])
+                        {
+                            Console.WriteLine($"\n😱 {p.Name} forgot to say UNO! They draw 2 cards.");
+                            p.DrawCard(DrawFromDeck());
+                            p.DrawCard(DrawFromDeck());
+                            p.SaidUno = true; // Mark as safe now
+                            Thread.Sleep(2000);
+                        }
+                    }
+                    else if (p.Hand.Count > 1 && p.SaidUno)
+                    {
+                        p.SaidUno = false; // Reset if they have more than one card again
+                    }
+                }
+
                 DisplayGameState();
                 Player currentPlayer = players[currentPlayerIndex];
                 

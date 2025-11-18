@@ -9,12 +9,14 @@ namespace UnoGame
         public string Name { get; set; }
         public List<Card> Hand { get; set; }
         public bool IsComputer { get; set; }
+        public bool SaidUno { get; set; }
 
         public Player(string name, bool isComputer = false)
         {
             Name = name;
             Hand = new List<Card>();
             IsComputer = isComputer;
+            SaidUno = false;
         }
 
         public void DrawCard(Card card)
