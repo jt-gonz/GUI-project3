@@ -135,22 +135,33 @@ namespace UnoGame
             Console.WriteLine("╚════════════════════════════════════════════════════════════════════════╝");
             Console.WriteLine();
 
-            // Show direction indicator
-            string direction = isClockwise ? "→" : "←";
-            Console.WriteLine($"Direction: {direction}");
-            Console.WriteLine();
+            // Calculate next player index
+            int nextPlayerIndex;
+            if (isClockwise)
+            {
+                nextPlayerIndex = (currentPlayerIndex + 1) % players.Count;
+            }
+            else
+            {
+                nextPlayerIndex = (currentPlayerIndex - 1 + players.Count) % players.Count;
+            }
 
             // Show all players' card counts in a box
             Console.WriteLine("┌─────────────────────────────────────────────────────────────────────┐");
-            foreach (var player in players)
+            for (int i = 0; i < players.Count; i++)
             {
-                string indicator = player == players[currentPlayerIndex] ? "►" : " ";
+                var player = players[i];
+                string indicator = i == currentPlayerIndex ? "►" : " ";
                 string nameDisplay = player.Name.PadRight(15);
                 string cardCount = $"{player.Hand.Count} cards".PadLeft(10);
                 
-                if (player == players[currentPlayerIndex])
+                if (i == currentPlayerIndex)
                 {
                     Console.ForegroundColor = ConsoleColor.Yellow;
+                }
+                else if (i == nextPlayerIndex)
+                {
+                    Console.ForegroundColor = ConsoleColor.Cyan;
                 }
                 Console.WriteLine($"│ {indicator} {nameDisplay} {cardCount}                                   │");
                 Console.ResetColor();
