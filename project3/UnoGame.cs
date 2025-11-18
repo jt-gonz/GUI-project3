@@ -87,7 +87,7 @@ namespace UnoGame
                     discardPile.Clear();
                     discardPile.Add(topCard);
                     ShuffleDeck();
-                    Console.WriteLine("\n♻ Reshuffling discard pile into deck...\n");
+                    Console.WriteLine("\n♻ Reshuffling discard pile into deck...");
                 }
             }
 
@@ -106,7 +106,7 @@ namespace UnoGame
         {
             players.Clear();
             players.Add(new Player("You", false));
-            
+
             for (int i = 1; i < numberOfPlayers; i++)
             {
                 players.Add(new Player($"Computer {i}", true));
@@ -133,7 +133,6 @@ namespace UnoGame
             Console.WriteLine("╔════════════════════════════════════════════════════════════════════════╗");
             Console.WriteLine("║                            UNO GAME                                    ║");
             Console.WriteLine("╚════════════════════════════════════════════════════════════════════════╝");
-            Console.WriteLine();
 
             // Calculate next player index
             int nextPlayerIndex;
@@ -146,14 +145,23 @@ namespace UnoGame
                 nextPlayerIndex = (currentPlayerIndex - 1 + players.Count) % players.Count;
             }
 
-            // Show all players' card counts in a box
-            Console.WriteLine("┌─────────────────────────────────────────────────────────────────────┐");
+            // Show all players' card counts in horizontal colored squares
+            Console.WriteLine();
+            
+            // Top border
+            for (int i = 0; i < players.Count; i++)
+            {
+                Console.Write("┌──────────────┐ ");
+            }
+            Console.WriteLine();
+            
+            // Player names with arrow
             for (int i = 0; i < players.Count; i++)
             {
                 var player = players[i];
-                string indicator = i == currentPlayerIndex ? "►" : " ";
-                string nameDisplay = player.Name.PadRight(15);
-                string cardCount = $"{player.Hand.Count} cards".PadLeft(10);
+                string arrow = i == currentPlayerIndex ? "> " : "  ";
+                string nameWithArrow = arrow + player.Name;
+                string nameDisplay = nameWithArrow.Length > 12 ? nameWithArrow.Substring(0, 12) : nameWithArrow.PadRight(12);
                 
                 if (i == currentPlayerIndex)
                 {
@@ -163,10 +171,38 @@ namespace UnoGame
                 {
                     Console.ForegroundColor = ConsoleColor.Cyan;
                 }
-                Console.WriteLine($"│ {indicator} {nameDisplay} {cardCount}                                   │");
+                
+                Console.Write($"│ {nameDisplay} │ ");
                 Console.ResetColor();
             }
-            Console.WriteLine("└─────────────────────────────────────────────────────────────────────┘");
+            Console.WriteLine();
+            
+            // Card counts
+            for (int i = 0; i < players.Count; i++)
+            {
+                var player = players[i];
+                string cardCount = $"  {player.Hand.Count} cards".PadRight(12);
+                
+                if (i == currentPlayerIndex)
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                }
+                else if (i == nextPlayerIndex)
+                {
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                }
+                
+                Console.Write($"│ {cardCount} │ ");
+                Console.ResetColor();
+            }
+            Console.WriteLine();
+            
+            // Bottom border
+            for (int i = 0; i < players.Count; i++)
+            {
+                Console.Write("└──────────────┘ ");
+            }
+            Console.WriteLine();
             Console.WriteLine();
 
             // Display top card
@@ -187,7 +223,6 @@ namespace UnoGame
                 Console.WriteLine($"█ {currentWildColor.Value} █");
                 Console.ResetColor();
             }
-            Console.WriteLine();
         }
 
         private CardColor ChooseWildColor(Player player)
@@ -306,8 +341,8 @@ namespace UnoGame
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine($"║              {player.Name}'s TURN                                          ║");
             Console.ResetColor();
-            Console.WriteLine($"╚═══════════════════════════════════════════════════════════════════════╝\n");
-            
+            Console.WriteLine($"╚═══════════════════════════════════════════════════════════════════════╝");
+
             if (!player.IsComputer)
             {
                 // Find playable cards
@@ -396,7 +431,7 @@ namespace UnoGame
                 // Computer player logic
                 Console.WriteLine($"{player.Name} is thinking...");
                 Thread.Sleep(2000); // Thinking time
-                
+
                 // Find playable cards
                 List<int> playableIndices = new List<int>();
                 for (int i = 0; i < player.Hand.Count; i++)

@@ -68,7 +68,7 @@ namespace UnoGame
         {
             ConsoleColor bgColor = GetConsoleColor();
             ConsoleColor fgColor = ConsoleColor.White;
-            
+
             if (Color == CardColor.Yellow)
                 fgColor = ConsoleColor.Black;
 
@@ -79,21 +79,21 @@ namespace UnoGame
             Console.ForegroundColor = bgColor;
             Console.Write("╔═════╗");
             Console.ResetColor();
-            
+
             if (highlight)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.Write(" ✓");
                 Console.ResetColor();
             }
-            
+
             if (showNumber)
             {
                 Console.ForegroundColor = ConsoleColor.Gray;
                 Console.Write($" [{numStr}]");
                 Console.ResetColor();
             }
-            
+
             Console.WriteLine();
 
             // Top section
@@ -133,7 +133,7 @@ namespace UnoGame
         {
             ConsoleColor bgColor = GetConsoleColor();
             ConsoleColor fgColor = ConsoleColor.White;
-            
+
             if (Color == CardColor.Yellow)
                 fgColor = ConsoleColor.Black;
 
@@ -148,7 +148,7 @@ namespace UnoGame
         {
             ConsoleColor bgColor = GetConsoleColor();
             ConsoleColor fgColor = ConsoleColor.White;
-            
+
             if (Color == CardColor.Yellow)
                 fgColor = ConsoleColor.Black;
 
