@@ -151,7 +151,7 @@ namespace UnoGame
             // Top border
             for (int i = 0; i < players.Count; i++)
             {
-                Console.Write("┌──────────────┐ ");
+                Console.Write("┌───────────────┐ ");
             }
             Console.WriteLine();
             
@@ -159,9 +159,9 @@ namespace UnoGame
             for (int i = 0; i < players.Count; i++)
             {
                 var player = players[i];
-                string arrow = i == currentPlayerIndex ? "> " : "  ";
+                string arrow = i == currentPlayerIndex ? "> " : " ";
                 string nameWithArrow = arrow + player.Name;
-                string nameDisplay = nameWithArrow.Length > 12 ? nameWithArrow.Substring(0, 12) : nameWithArrow.PadRight(12);
+                string nameDisplay = nameWithArrow.Length > 13 ? nameWithArrow.Substring(0, 13) : nameWithArrow.PadRight(13);
                 
                 if (i == currentPlayerIndex)
                 {
@@ -181,7 +181,7 @@ namespace UnoGame
             for (int i = 0; i < players.Count; i++)
             {
                 var player = players[i];
-                string cardCount = $"  {player.Hand.Count} cards".PadRight(12);
+                string cardCount = $"  {player.Hand.Count} cards".PadRight(13);
                 
                 if (i == currentPlayerIndex)
                 {
@@ -200,9 +200,8 @@ namespace UnoGame
             // Bottom border
             for (int i = 0; i < players.Count; i++)
             {
-                Console.Write("└──────────────┘ ");
+                Console.Write("└───────────────┘ ");
             }
-            Console.WriteLine();
             Console.WriteLine();
 
             // Display top card
@@ -339,7 +338,8 @@ namespace UnoGame
         {
             Console.WriteLine($"\n╔═══════════════════════════════════════════════════════════════════════╗");
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine($"║              {player.Name}'s TURN                                          ║");
+            string turnText = player.Name == "You" ? "Your TURN        " : $"{player.Name}'s TURN";
+            Console.WriteLine($"║              {turnText}                                        ║");
             Console.ResetColor();
             Console.WriteLine($"╚═══════════════════════════════════════════════════════════════════════╝");
 
@@ -378,7 +378,7 @@ namespace UnoGame
                     while (true)
                     {
                         Console.WriteLine("\n┌─────────────────────────────────────┐");
-                        Console.WriteLine("│ Enter card # to play, or 0 to draw │");
+                        Console.WriteLine("│ Enter card # to play, or 0 to draw  │");
                         Console.WriteLine("└─────────────────────────────────────┘");
                         Console.Write("Your choice: ");
                         string? input = Console.ReadLine();
@@ -560,16 +560,16 @@ namespace UnoGame
                 Console.WriteLine("║                                                                        ║");
                 Console.WriteLine("╚════════════════════════════════════════════════════════════════════════╝");
                 Console.WriteLine();
-                Console.WriteLine("                           ┌──────────────────────────┐");
-                Console.WriteLine("                           │      MAIN MENU           │");
-                Console.WriteLine("                           ├──────────────────────────┤");
-                Console.WriteLine("                           │ 1. Start Game            │");
-                Console.WriteLine("                           │ 2. Rules                 │");
-                Console.WriteLine($"                           │ 3. Players ({numberOfPlayers})           │");
-                Console.WriteLine("                           │ 4. Quit                  │");
-                Console.WriteLine("                           └──────────────────────────┘");
+                Console.WriteLine("                      ┌──────────────────────────┐");
+                Console.WriteLine("                      │      MAIN MENU           │");
+                Console.WriteLine("                      ├──────────────────────────┤");
+                Console.WriteLine("                      │ 1. Start Game            │");
+                Console.WriteLine("                      │ 2. Rules                 │");
+                Console.WriteLine($"                      │ 3. Players ({numberOfPlayers})           │");
+                Console.WriteLine("                      │ 4. Quit                  │");
+                Console.WriteLine("                      └──────────────────────────┘");
                 Console.WriteLine();
-                Console.Write("                           Enter choice (1-4): ");
+                Console.Write("                        Enter choice (1-4): ");
                 
                 string? input = Console.ReadLine();
                 
